@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Quiz Creator & Player | Bocaletto Luca</title>
+  <meta name="description" content="Modern, responsive quiz builder and player. Create, edit, delete questions & options, mark correct answers, import/export JSON, save locally, and take quizzes online.">
+  <meta name="keywords" content="quiz creator, quiz builder, quiz player, html, css, javascript, json, responsive, print">
+  <meta name="author" content="Bocaletto Luca">
+  <link rel="canonical" href="https://github.com/bocaletto-luca/QuizCreatorPlayer">
+  <meta property="og:title" content="Quiz Creator & Player">
+  <meta property="og:description" content="Build and play quizzes in your browser. Full editor, import/export JSON, print, and save locally.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://github.com/bocaletto-luca/QuizCreatorPlayer">
+  <meta property="og:image" content="https://picsum.photos/seed/quiz/1200/630">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Quiz Creator & Player",
+    "url": "https://github.com/bocaletto-luca/QuizCreatorPlayer",
+    "author": {
+      "@type": "Person",
+      "name": "Bocaletto Luca"
+    },
+    "description": "Modern, responsive quiz builder and player. Create, edit, delete questions & options, mark correct answers, import/export JSON, save locally, and take quizzes online."
+  }
+  </script>
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --accent: #10b981;
+      --accent-dark: #0e7f60;
+      --danger: #e53e3e;
+      --danger-dark: #9b2c2c;
+      --text: #1f2937;
+      --border: #d1d5db;
+      --radius: 8px;
+      --gap: 1rem;
+      --max-width: 900px;
+      --transition: .2s ease-in-out;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body {
+      font-family:'Inter',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      display:flex;flex-direction:column;
+      min-height:100vh;padding:var(--gap);
+    }
+    header,footer{width:100%;max-width:var(--max-width);margin:auto;}
+    header {text-align:center;margin-bottom:var(--gap);}
+    header h1 {
+      font-size:2rem;font-weight:500;
+      margin-bottom:.5rem;
+    }
+    header p {
+      color:#555;font-size:.9rem;
+    }
+    nav {
+      display:flex;gap:var(--gap);justify-content:center;margin-top:.5rem;
+    }
+    nav button {
+      background:var(--primary);
+      color:#fff;
+      border:none;
+      padding:.5rem 1rem;
+      border-radius:var(--radius);
+      cursor:pointer;
+      transition:background var(--transition);
+    }
+    nav button.active,nav button:hover {
+      background:var(--primary-dark);
+    }
+    main {
+      flex:1;width:100%;max-width:var(--max-width);
+      margin:auto;
+    }
+    .section{display:none;}
+    .section.active{display:block;}
+    /* Editor */
+    #editor h2 {font-size:1.5rem;margin-bottom:var(--gap);}
+    #quiz-title {
+      width:100%;padding:.5rem;border:1px solid var(--border);
+      border-radius:var(--radius);margin-bottom:var(--gap);
+      font-size:1.1rem;
+    }
+    #questions{display:flex;flex-direction:column;gap:var(--gap);}
+    .question-card {
+      background:var(--card);border:1px solid var(--border);
+      border-radius:var(--radius);padding:var(--gap);
+      display:grid;grid-template-columns:1fr auto;gap:var(--gap);
+      align-items:start;
+    }
+    .question-main{display:flex;flex-direction:column;gap:.5rem;}
+    .question-main input[type="text"] {
+      width:100%;padding:.5rem;border:1px solid var(--border);
+      border-radius:var(--radius);font:inherit;
+    }
+    .options{display:flex;flex-direction:column;gap:.3rem;}
+    .option-item{display:flex;gap:.5rem;align-items:center;}
+    .option-item input[type="text"] {
+      flex:1;padding:.4rem;border:1px solid var(--border);
+      border-radius:var(--radius);font:inherit;
+    }
+    .option-item input[type="radio"] {
+      accent-color:var(--accent);cursor:pointer;
+    }
+    .option-item button {
+      background:var(--danger);color:#fff;border:none;
+      padding:.3rem .6rem;border-radius:var(--radius);
+      cursor:pointer;transition:background var(--transition);
+      font-size:.8rem;
+    }
+    .option-item button:hover {background:var(--danger-dark);}
+    .add-opt {
+      margin-top:.5rem;align-self:flex-start;
+      background:var(--accent);color:#fff;border:none;
+      padding:.4rem .8rem;border-radius:var(--radius);
+      cursor:pointer;transition:background var(--transition);
+      font-size:.9rem;
+    }
+    .add-opt:hover{background:var(--accent-dark);}
+    .question-actions button {
+      background:var(--danger);color:#fff;border:none;
+      padding:.4rem .8rem;border-radius:var(--radius);
+      cursor:pointer;transition:background var(--transition);
+      font-size:.9rem;
+    }
+    .question-actions button:hover{background:var(--danger-dark);}
+    #add-question {
+      margin-top:var(--gap);background:var(--accent);color:#fff;
+      border:none;padding:.6rem 1.2rem;border-radius:var(--radius);
+      cursor:pointer;transition:background var(--transition);
+      font-size:1rem;
+    }
+    #add-question:hover{background:var(--accent-dark);}
+    /* IO Controls */
+    #io-controls {
+      display:flex;flex-wrap:wrap;gap:var(--gap);
+      justify-content:flex-end;margin:var(--gap) 0;
+    }
+    #io-controls button {
+      background:var(--primary);color:#fff;border:none;
+      padding:.5rem 1rem;border-radius:var(--radius);
+      cursor:pointer;transition:background var(--transition);
+      font-size:.9rem;
+    }
+    #io-controls button:hover{background:var(--primary-dark);}
+    #file-input{display:none;}
+
+    /* Player */
+    #player h2{font-size:1.5rem;margin-bottom:var(--gap);}
+    .question-view {
+      background:var(--card);border:1px solid var(--border);
+      border-radius:var(--radius);padding:var(--gap);
+      margin-bottom:var(--gap);
+    }
+    .question-view h3{font-size:1.2rem;margin-bottom:.5rem;}
+    .answers{display:flex;flex-direction:column;gap:.5rem;}
+    .answers label {
+      display:flex;align-items:center;gap:.5rem;cursor:pointer;
+    }
+    .answers input[type="radio"] {
+      accent-color:var(--accent);cursor:pointer;
+    }
+    .nav-buttons {
+      display:flex;justify-content:space-between;gap:var(--gap);
+    }
+    .nav-buttons button {
+      background:var(--accent);color:#fff;border:none;
+      padding:.5rem 1rem;border-radius:var(--radius);
+      cursor:pointer;transition:background var(--transition);
+      font-size:.9rem;
+    }
+    .nav-buttons button:hover{background:var(--accent-dark);}
+    #score-view {
+      text-align:center;font-size:1.2rem;margin-top:var(--gap);
+    }
+
+    /* Footer */
+    footer {
+      text-align:center;margin:var(--gap) auto 0;color:#555;
+      font-size:.85rem;
+    }
+    footer a {color:var(--primary);text-decoration:none;}
+    footer a:hover{text-decoration:underline;}
+
+    /* Print */
+    @media print {
+      header,nav,#io-controls,#add-question,#quiz-title,
+      .question-actions,.nav-buttons,.answers input {display:none!important;}
+      body{padding:0;}
+      .section.active{display:block;}
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Quiz Creator & Player</h1>
+    <p>Create, manage, and take quizzes—online or printed.</p>
+    <nav>
+      <button id="tab-editor" class="active">Editor</button>
+      <button id="tab-player">Play</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Editor -->
+    <section id="editor" class="section active" aria-labelledby="tab-editor">
+      <h2>Quiz Editor</h2>
+      <label for="quiz-title">Quiz Title</label>
+      <input type="text" id="quiz-title" placeholder="Enter quiz title…" />
+
+      <div id="questions"></div>
+      <button id="add-question">+ Add Question</button>
+
+      <div id="io-controls">
+        <button id="save-local">Save Locally</button>
+        <button id="export-json">Export JSON</button>
+        <button id="import-json">Import JSON</button>
+        <input type="file" id="file-input" accept=".json" aria-label="Import quiz file" />
+        <button id="print-quiz">Print Quiz</button>
+      </div>
+    </section>
+
+    <!-- Player -->
+    <section id="player" class="section" aria-labelledby="tab-player">
+      <h2 id="play-title"></h2>
+      <div id="play-area"></div>
+      <div class="nav-buttons">
+        <button id="prev-btn">Previous</button>
+        <button id="next-btn">Next</button>
+      </div>
+      <div id="score-view"></div>
+    </section>
+  </main>
+
+  <footer>
+    © 2025 Bocaletto Luca — 
+    <a href="https://github.com/bocaletto-luca/QuizCreatorPlayer" target="_blank" rel="noopener">GitHub Repo</a>
+  </footer>
+
+  <script>
+    // State & Initial Load
+    let quiz = JSON.parse(localStorage.getItem('quiz') || 
+      JSON.stringify({ title:'', questions:[] }));
+    let currentIndex = 0, userAnswers = [];
+
+    // DOM References
+    const tabEditor   = document.getElementById('tab-editor');
+    const tabPlayer   = document.getElementById('tab-player');
+    const editorSec   = document.getElementById('editor');
+    const playerSec   = document.getElementById('player');
+    const qTitleInput = document.getElementById('quiz-title');
+    const questionsEl = document.getElementById('questions');
+    const addQBtn     = document.getElementById('add-question');
+    const saveLocal   = document.getElementById('save-local');
+    const exportBtn   = document.getElementById('export-json');
+    const importBtn   = document.getElementById('import-json');
+    const fileInput   = document.getElementById('file-input');
+    const printBtn    = document.getElementById('print-quiz');
+
+    const playTitle   = document.getElementById('play-title');
+    const playArea    = document.getElementById('play-area');
+    const prevBtn     = document.getElementById('prev-btn');
+    const nextBtn     = document.getElementById('next-btn');
+    const scoreView   = document.getElementById('score-view');
+
+    // Tab Handlers
+    tabEditor.onclick = () => switchTab('editor');
+    tabPlayer.onclick = () => switchTab('player');
+    function switchTab(tab) {
+      tab==='editor'
+        ? activateEditor()
+        : activatePlayer();
+    }
+    function activateEditor() {
+      editorSec.classList.add('active');
+      playerSec.classList.remove('active');
+      tabEditor.classList.add('active');
+      tabPlayer.classList.remove('active');
+    }
+    function activatePlayer() {
+      startPlayer();
+      editorSec.classList.remove('active');
+      playerSec.classList.add('active');
+      tabEditor.classList.remove('active');
+      tabPlayer.classList.add('active');
+    }
+
+    // Editor Rendering
+    function renderEditor() {
+      qTitleInput.value = quiz.title;
+      questionsEl.innerHTML = '';
+      quiz.questions.forEach((q, qi) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+
+        // Question Text
+        const mainDiv = document.createElement('div');
+        mainDiv.className = 'question-main';
+        const qInput = document.createElement('input');
+        qInput.type = 'text';
+        qInput.value = q.text;
+        qInput.placeholder = 'Question text…';
+        qInput.oninput = () => { quiz.questions[qi].text = qInput.value; };
+        mainDiv.append(qInput);
+
+        // Options
+        const optsDiv = document.createElement('div');
+        optsDiv.className = 'options';
+        q.options.forEach((opt, oi) => {
+          const optDiv = document.createElement('div');
+          optDiv.className = 'option-item';
+          const radio = document.createElement('input');
+          radio.type = 'radio';
+          radio.name = `correct-${qi}`;
+          radio.checked = (q.correct === oi);
+          radio.onchange = () => { quiz.questions[qi].correct = oi; };
+          const textIn = document.createElement('input');
+          textIn.type = 'text';
+          textIn.value = opt;
+          textIn.placeholder = 'Option text…';
+          textIn.oninput = () => { quiz.questions[qi].options[oi] = textIn.value; };
+          const delOpt = document.createElement('button');
+          delOpt.textContent = '×';
+          delOpt.onclick = () => {
+            quiz.questions[qi].options.splice(oi,1);
+            if (q.correct >= q.options.length) q.correct = 0;
+            renderEditor();
+          };
+          optDiv.append(radio, textIn, delOpt);
+          optsDiv.append(optDiv);
+        });
+        mainDiv.append(optsDiv);
+
+        // Add Option Button
+        const addOptBtn = document.createElement('button');
+        addOptBtn.className = 'add-opt';
+        addOptBtn.textContent = '+ Add Option';
+        addOptBtn.onclick = () => {
+          quiz.questions[qi].options.push('');
+          renderEditor();
+        };
+        mainDiv.append(addOptBtn);
+
+        // Delete Question
+        const actionDiv = document.createElement('div');
+        actionDiv.className = 'question-actions';
+        const delQBtn = document.createElement('button');
+        delQBtn.textContent = 'Delete';
+        delQBtn.onclick = () => {
+          quiz.questions.splice(qi,1);
+          renderEditor();
+        };
+        actionDiv.append(delQBtn);
+
+        card.append(mainDiv, actionDiv);
+        questionsEl.append(card);
+      });
+    }
+
+    addQBtn.onclick = () => {
+      quiz.questions.push({ text:'', options:[], correct:0 });
+      renderEditor();
+    };
+
+    // Local Save
+    saveLocal.onclick = () => {
+      quiz.title = qTitleInput.value.trim();
+      localStorage.setItem('quiz', JSON.stringify(quiz));
+      alert('Quiz saved locally.');
+    };
+
+    // Export JSON
+    exportBtn.onclick = () => {
+      quiz.title = qTitleInput.value.trim();
+      const blob = new Blob([JSON.stringify(quiz,null,2)],{type:'application/json'});
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = 'quiz.json'; a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // Import JSON
+    importBtn.onclick = () => fileInput.click();
+    fileInput.onchange = e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (typeof data.title==='string' && Array.isArray(data.questions)) {
+            quiz = data;
+            localStorage.setItem('quiz', JSON.stringify(quiz));
+            renderEditor();
+            alert('Quiz imported.');
+          } else throw 'Invalid';
+        } catch {
+          alert('Invalid quiz JSON.');
+        }
+      };
+      reader.readAsText(f);
+    };
+
+    // Print
+    printBtn.onclick = () => window.print();
+
+    // Initialize Editor
+    renderEditor();
+
+    // Player Logic
+    function startPlayer() {
+      quiz.title = qTitleInput.value.trim();
+      playTitle.textContent = quiz.title;
+      currentIndex = 0;
+      userAnswers = Array(quiz.questions.length).fill(null);
+      scoreView.innerHTML = '';
+      prevBtn.style.visibility = 'hidden';
+      nextBtn.textContent = quiz.questions.length>1 ? 'Next' : 'Submit';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = quiz.questions[currentIndex];
+      playArea.innerHTML = `<div class="question-view">
+        <h3>Q${currentIndex+1}. ${q.text}</h3>
+        <div class="answers">
+          ${q.options.map((opt,i)=>`
+            <label>
+              <input type="radio" name="answer" value="${i}" ${userAnswers[currentIndex]===i?'checked':''}>
+              ${opt}
+            </label>`).join('')}
+        </div>
+      </div>`;
+      playArea.querySelectorAll('input[name="answer"]').forEach(inp => {
+        inp.onchange = () => userAnswers[currentIndex] = +inp.value;
+      });
+    }
+
+    prevBtn.onclick = () => {
+      if (currentIndex>0) {
+        currentIndex--;
+        nextBtn.textContent = 'Next';
+        if (currentIndex===0) prevBtn.style.visibility='hidden';
+        showQuestion();
+      }
+    };
+    nextBtn.onclick = () => {
+      if (currentIndex < quiz.questions.length-1) {
+        currentIndex++;
+        prevBtn.style.visibility = 'visible';
+        if (currentIndex===quiz.questions.length-1) nextBtn.textContent='Submit';
+        showQuestion();
+      } else {
+        let score=0;
+        quiz.questions.forEach((q,i)=>{ if(userAnswers[i]===q.correct) score++; });
+        playArea.innerHTML = '';
+        prevBtn.style.visibility = 'hidden';
+        nextBtn.style.visibility = 'hidden';
+        scoreView.innerHTML = `<div>Your Score: ${score} / ${quiz.questions.length}</div>`;
+      }
+    };
+  </script>
+</body>
+</html>
